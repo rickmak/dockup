@@ -1,5 +1,6 @@
 #!/bin/bash
 export PATH=$PATH:/usr/bin:/usr/local/bin:/bin
+: ${MYSQL_HOST:='mysql'}
 : ${MYSQL_DUMP:='dump.sql'}
 # Get timestamp
 : ${SUFFIX:='%Y-%m-%d-%H-%M-%S'}
@@ -7,7 +8,10 @@ export PATH=$PATH:/usr/bin:/usr/local/bin:/bin
 readonly tarball=$BACKUP_NAME$BACKUP_SUFFIX.tar.gz
 
 if [[ -n "$MYSQL_DB" ]]; then
-    mysqldump -u $MYSQL_USER -p$MYSQL_PASS --single-transaction -B $MYSQL_DB > $MYSQL_DUMP
+    mysqldump -u $MYSQL_USER -p$MYSQL_PASS \
+        --single-transaction --protocol=tcp \
+        -h $MYSQL_HOST \
+        -B $MYSQL_DB > $MYSQL_DUMP
 fi
 
 # Create a gzip compressed tarball with the volume(s)
