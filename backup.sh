@@ -1,7 +1,8 @@
 #!/bin/bash
 export PATH=$PATH:/usr/bin:/usr/local/bin:/bin
 # Get timestamp
-: ${BACKUP_SUFFIX:=.$(date +"%Y-%m-%d-%H-%M-%S")}
+: ${SUFFIX:='%Y-%m-%d-%H-%M-%S'}
+: ${BACKUP_SUFFIX:=.$(date +"$SUFFIX")}
 readonly tarball=$BACKUP_NAME$BACKUP_SUFFIX.tar.gz
 
 # Create a gzip compressed tarball with the volume(s)
