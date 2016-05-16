@@ -1,7 +1,4 @@
-
 # Dockup
-
-[![Deploy to Tutum](https://s.tutum.co/deploy-to-tutum.svg)](https://dashboard.tutum.co/stack/deploy/)
 
 Docker image to backup your Docker container volumes
 
@@ -12,16 +9,15 @@ Why the name? Docker + Backup = Dockup
 You have a container running with one or more volumes:
 
 ```
-$ docker run -d --name mysql tutum/mysql
+$ docker run -d --name mysql rickmak/mysql
 ```
 
-From executing a `$ docker inspect mysql` we see that this container has two volumes:
+From executing a `$ docker inspect wordpress` we see that this container has two volumes:
 
 ```
 "Volumes": {
-            "/etc/mysql": {},
-            "/var/lib/mysql": {}
-        }
+  "/var/www/html": {}
+}
 ```
 
 ## Backup
@@ -30,8 +26,9 @@ Launch `dockup` container with the following flags:
 ```
 $ docker run --rm \
 --env-file env.txt \
---volumes-from mysql \
---name dockup tutum/dockup:latest
+--link mysql
+--volumes-from wordpress \
+--name dockup rickmak/dockup:latest
 ```
 
 The contents of `env.txt` being:
@@ -43,20 +40,29 @@ AWS_DEFAULT_REGION=us-east-1
 BACKUP_NAME=mysql
 PATHS_TO_BACKUP=/etc/mysql /var/lib/mysql
 S3_BUCKET_NAME=docker-backups.example.com
+MYSQL_USER=root
+MYSQL_PASS=
+MYSQL_DB=db
 RESTORE=false
 ```
 
-`dockup` will use your AWS credentials to create a new bucket with name as per the environment variable `S3_BUCKET_NAME`, or if not defined, using the default name `docker-backups.example.com`. The paths in `PATHS_TO_BACKUP` will be tarballed, gzipped, time-stamped and uploaded to the S3 bucket.
+`dockup` assume the bucket with name `S3_BUCKET_NAME` already created.
+The paths in `PATHS_TO_BACKUP` will be tarballed, gzipped, time-stamped and
+uploaded to the S3 bucket.
 
 
 ## Restore
-To restore your data simply set the `RESTORE` environment variable to `true` - this will restore the latest backup from S3 to your volume.
+To restore your data simply set the `RESTORE` environment variable to `true`
+  - this will restore the latest backup from S3 to your volume.
 
 
 ## A note on Buckets
 
 > [Bucket naming guidelines](http://docs.aws.amazon.com/cli/latest/userguide/using-s3-commands.html):
-> "Bucket names must be unique and should be DNS compliant. Bucket names can contain lowercase letters, numbers, hyphens and periods. Bucket names can only start and end with a letter or number, and cannot contain a period next to a hyphen or another period."
+> "Bucket names must be unique and should be DNS compliant. Bucket names can
+> contain lowercase letters, numbers, hyphens and periods. Bucket names can
+> only start and end with a letter or number, and cannot contain a period next
+> to a hyphen or another period."
 
 These rules are enforced in some regions.
 
@@ -75,8 +81,3 @@ These rules are enforced in some regions.
 | Asia Pacific (Tokyo)      | ap-northeast-1 |
 | South America (Sao Paulo) | sa-east-1      |
 
-
-To perform a restore launch the container with the RESTORE variable set to true
-
-
-![](http://s.tutum.co.s3.amazonaws.com/support/images/dockup-readme.png)
