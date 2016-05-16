@@ -1,0 +1,18 @@
+dockup:
+  image: 'rickmak/dockup:latest'
+  restart: always
+  environment:
+    AWS_ACCESS_KEY_ID: <key_here> #MUST CHANGE THIS
+    AWS_SECRET_ACCESS_KEY: <secret_here> #MUST CHANGE THIS
+    AWS_DEFAULT_REGION: us-east-1 #OPTIONALLY CHANGE THIS
+    BACKUP_NAME: backup #OPTIONALLY CHANGE THIS
+    PATHS_TO_BACKUP: /first/path/here /second/path/here #MUST CHANGE THIS
+    MYSQL_USER: root
+    MYSQL_PASS: 
+    MYSQL_DB: db
+    S3_BUCKET_NAME: dockup-backups #OPTIONALLY CHANGE THIS
+  links:
+    - mysql # CHANGE THIS
+  volumes_from:
+    - serviceA #MUST CHANGE THIS
+    - serviceB.stack1 #MUST CHANGE THIS
